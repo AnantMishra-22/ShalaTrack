@@ -6,7 +6,7 @@ An isolated React + TypeScript frontend with a light lavender palette, a translu
 
 ```powershell
 cd C:\Users\anant\OneDrive\Desktop\shalatrack-web\Redesign
-npm install --legacy-peer-deps
+npm ci
 npm run dev
 ```
 
@@ -50,4 +50,8 @@ Fonts and icons are bundled locally. The connection policy is restricted to this
 
 Better Design verification was explicitly waived by the user on 1 November 2026 after its quota was exhausted. No Better Design approval, spacing score or VALID dashboard receipt is claimed. The initial shell/dashboard received local browser checks before this continuation. The subsequent browser attempt was rejected by the browser URL policy, so final visual and interaction review of the expanded pages remains pending.
 
-The generated component registry is under `src/components/ui`; only imported components are compiled into the app. Unused registry examples have not been certified. Its older date picker is unused and requires compatibility work before adoption. Excel and PDF libraries are loaded only on export; Excel's lazy chunk is comparatively large.
+The generated component registry is under `src/components/ui`; only imported components are compiled into the app. Unused registry examples have not been certified. The unused calendar dependency is pinned to the compatible v9 major; installs do not require legacy peer resolution. Excel and PDF libraries are loaded only on export; Excel's lazy chunk is comparatively large.
+
+## Vercel
+
+Use the repository root as the Root Directory, the Vite framework preset, `npm ci` as the Install Command, `npm run build` as the Build Command, and `dist` as the Output Directory. The GitHub repository contains the Redesign directory contents at its root. Redeploy the latest `main` commit after dependency changes. No production service environment variables are needed for this sample-data frontend.
