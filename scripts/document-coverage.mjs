@@ -1,0 +1,10 @@
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import ts from 'typescript';
+const source=await readFile(new URL('../src/data/pages.ts',import.meta.url),'utf8');
+const code=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
+const {originalPages,addedPages}=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+const rows=originalPages.map(page=>`| \`${page.path}\` | ${page.title} | ${page.features.join('; ')} |`);
+const added=addedPages.map(page=>`| \`${page.path}\` | ${page.title} | ${page.features.join('; ')} |`);
+await mkdir(new URL('../docs/',import.meta.url),{recursive:true});
+await writeFile(new URL('../docs/PAGE_COVERAGE.md',import.meta.url),`# Page and feature coverage\n\nAll ${originalPages.length} original destinations have React implementations. The four backend-aligned additions are implemented with local sample data. UI actions do not call production services. Better Design verification was waived by the user; final browser review of the expanded pages remains pending.\n\n| Original route | Page | Frontend features |\n| --- | --- | --- |\n${rows.join('\n')}\n\n## Backend-aligned additions\n\n| Route | Page | Frontend features |\n| --- | --- | --- |\n${added.join('\n')}\n\nHard-delete actions are represented by reversible archive/restore flows to preserve history. Administrator-set teacher passwords are replaced by simulated invitations/resets. QR check-in replaces self-selected teacher status as agreed. Broadcast delivery and authentication remain simulations. PDF/Excel exports are generated locally.\n`);
+console.log(`Documented ${originalPages.length} original and ${addedPages.length} added pages.`);

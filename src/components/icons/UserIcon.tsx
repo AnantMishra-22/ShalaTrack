@@ -1,0 +1,2 @@
+import type { SVGProps } from 'react';
+export function UserIcon(props: SVGProps<SVGSVGElement>) { return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" {...props}><g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"><path d="M5 20v-1a7 7 0 1 1 14 0v1"/><path d="M12 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8"/></g></svg>; }

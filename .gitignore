@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.npm-cache/
+.tools/
+*.tsbuildinfo
+.env*
+!.env.example
+review/*.png
+review/*.json
+review/*.log
+
+.vite-test-cache/
+.vite-dev-cache/
