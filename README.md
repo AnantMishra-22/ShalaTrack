@@ -67,3 +67,13 @@ Real authentication, provider messaging and server QR verification remain outsid
 ## Class-first fee dashboard
 
 The fee dashboard follows the supplied overview reference using the approved lavender palette: banner, four school-wide cards, class list and fee summary. Each class combines its sections; selecting a row opens its student accounts with section, net fee, discount, collected amount, outstanding amount and an Open account action. Back navigation preserves the academic year and class-list filters. Net assigned fees already deduct discounts; collected values subtract reversals. Category filtering locates classes with that category while keeping complete class-account totals, as labelled on screen.
+
+## Hostel and transport students
+
+Separate administrator pages list hostel and transport students with class/status/building/route filters, details, exports and fee links. Student addition/editing supports independent service enrollment: hostel/building, room, admission date; transport route, stop, vehicle and start date. A student may enroll in both services. Student details show these fields alongside guardian information.
+
+Create general, hostel-only or transport-only fee plans. Apply plans from Fee structures or use Assign class fees in a student fee account; service plans charge only eligible enrolled students. Saving enrollment alone does not automatically assess a fee. Receipts and payment history retain the assessment's service classification. Ending service enrollment does not delete previous assessments, balances or payments.
+
+The fee dashboard filters student cohorts (all, hostel, transport, both or neither) and recomputes class totals consistently. Collection provides the same student filter and service details; fee structures/history filter the charge's service type. Current cohort filters describe current enrollment, whereas payment-service history retains the original charge classification.
+
+Existing stored students without these fields remain unenrolled until edited. Fresh/reset fictional data includes examples; resetting is optional and replaces demo workspace changes. No production data or Firebase connection is involved.

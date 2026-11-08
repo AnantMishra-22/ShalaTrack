@@ -2,6 +2,8 @@ import { useRef, useState, type FormEvent } from 'react';
 import { useWorkspace } from '../data/WorkspaceStore';
 import { DEMO_DAY, type DemoSchool } from '../domain/dashboard';
 import { accountBalance, allocatePayment, installmentBalance, validatePayment } from '../domain/operations';
+import { assessStudentPlan, eligibleForPlan, matchesService, serviceLabel, serviceOptions } from '../domain/studentServices';
+import { StudentServiceDetails } from '../components/StudentServices';
 import { savePayableSetup } from '../domain/parity';
 import { classLabel, money, id, type Payment, type FeeAccount } from '../domain/model';
 import { Button } from '../components/ui/button';
@@ -22,6 +24,7 @@ export function FeeCollectionPage({ school }: { school: DemoSchool }) {
   const { state, commit } = useWorkspace();
   const [studentId, setStudentId] = useState(parameter('student'));
   const [year, setYear] = useState(parameter('year') || state.years.find(row=>row.schoolId===school.id&&row.status==='current')?.label || '2026-27');
+  const [service,setService]=useState(parameter('service')||'all');
   const [query, setQuery] = useState(''), [search, setSearch] = useState('');
   const [discountType, setDiscountType] = useState<FeeAccount['discountType']>('none'), [discountValue, setDiscountValue] = useState('0');
   const [amount, setAmount] = useState(''), [method, setMethod] = useState(''), [reference, setReference] = useState(''), [date, setDate] = useState(DEMO_DAY), [category, setCategory] = useState('');
@@ -39,7 +42,7 @@ export function FeeCollectionPage({ school }: { school: DemoSchool }) {
   const proposedDiscount = discountType==='none'?0:discountType==='percentage'?Math.round(pending*parsedDiscount/100):Math.round(parsedDiscount*100);
   const discount = account ? savedDiscount : Number.isFinite(proposedDiscount)?proposedDiscount:0;
   const openYear = state.years.some(row=>row.schoolId===school.id&&row.label===year&&row.status==='current');
-  const results = state.students.filter(row=>row.schoolId===school.id&&row.status==='active'&&`${row.name} ${row.admissionNumber}`.toLowerCase().includes(search.toLowerCase()));
+  const results = state.students.filter(row=>row.schoolId===school.id&&row.status==='active'&&matchesService(row,service)&&`${row.name} ${row.admissionNumber}`.toLowerCase().includes(search.toLowerCase()));
   const selectedInstallments = assessments.find(row=>row.id===installmentId);
   function clearPayment() { setAmount('');setMethod('');setReference('');setCategory(''); }
   function selectStudent(value: string) {setStudentId(value);setDiscountType('none');setDiscountValue('0');setError('');setMessage('');clearPayment();}
@@ -59,14 +62,10 @@ export function FeeCollectionPage({ school }: { school: DemoSchool }) {
   function assignFees() {
     try{assertCurrent();if(!student)return;
       commit(school.id,'Class fees assigned',student.name,draft=>{
-        const plans=draft.feePlans.filter(row=>row.schoolId===school.id&&row.classId===student.classId&&row.year===year);
+        const plans=draft.feePlans.filter(row=>row.schoolId===school.id&&row.classId===student.classId&&row.year===year&&eligibleForPlan(student,row));
         if(!plans.length)throw new Error('Create a fee structure for this class and year first.');
         const latest=new Map<string,typeof plans[number]>();for(const plan of plans)if((latest.get(plan.category)?.version||0)<plan.version)latest.set(plan.category,plan);
-        for(const plan of latest.values()){
-          if(draft.assessments.some(row=>row.schoolId===school.id&&row.studentId===studentId&&row.year===year&&row.category===plan.category))continue;
-          const next={id:id('assessment'),schoolId:school.id,studentId,year,planId:plan.id,category:plan.category,amountPaise:plan.amountPaise,installments:plan.installments.map(row=>({...row,id:id('installment')}))};
-          draft.assessments.push(next);draft.ledger.push({id:id('ledger'),schoolId:school.id,studentId,year,amountPaise:next.amountPaise,kind:'assessment',sourceId:next.id,at:new Date().toISOString()});
-        }
+        for(const plan of latest.values())assessStudentPlan(draft,school.id,studentId,plan,id,new Date().toISOString());
       });setMessage('Class fees assigned. Any saved discount remains unchanged.');
     }catch(err){setError((err as Error).message);}
   }
@@ -78,19 +77,19 @@ export function FeeCollectionPage({ school }: { school: DemoSchool }) {
       if(!category||!date)throw new Error('Choose a fee category and payment date.');
       const value=toPaise(amount),allocations=allocatePayment(draft,school.id,studentId,year,value,category);
       const sequence=1+Math.max(0,...draft.payments.filter(row=>row.schoolId===school.id&&row.year===year).map(row=>Number(row.receiptNumber.split('/').at(-1))||0));
-      const payment:Payment={id:paymentId.current,schoolId:school.id,studentId,year,amountPaise:value,method,reference:reference.trim(),paymentDate:date,recordedAt:new Date().toISOString(),receiptNumber:`${school.initials}/${year}/${String(sequence).padStart(4,'0')}`,studentName:student.name,admissionNumber:student.admissionNumber,className:classLabel(draft.classes.find(row=>row.id===student.classId)),allocations,category,assessedPaise:assessed,previousPaidPaise:paid,discountPaise:savedDiscount,balancePaise:accountBalance(draft,school.id,studentId,year)-value};
+      const payment:Payment={id:paymentId.current,schoolId:school.id,studentId,year,amountPaise:value,method,reference:reference.trim(),paymentDate:date,recordedAt:new Date().toISOString(),receiptNumber:`${school.initials}/${year}/${String(sequence).padStart(4,'0')}`,studentName:student.name,admissionNumber:student.admissionNumber,className:classLabel(draft.classes.find(row=>row.id===student.classId)),allocations,category,service:assessments.find(row=>row.category===category)?.service||'all',assessedPaise:assessed,previousPaidPaise:paid,discountPaise:savedDiscount,balancePaise:accountBalance(draft,school.id,studentId,year)-value};
       validatePayment(payment);draft.payments.push(payment);draft.ledger.push({id:id('ledger'),schoolId:school.id,studentId,year,amountPaise:-value,kind:'payment',sourceId:payment.id,at:payment.recordedAt});return payment.id;
     });setReceiptId(saved);clearPayment();setMessage('Payment recorded and sample receipt issued.');
   }
   function categoryPaid(installmentIds: string[]) {return activePayments.flatMap(row=>row.allocations).filter(row=>installmentIds.includes(row.installmentId)).reduce((sum,row)=>sum+row.amountPaise,0);}
   return <WorkspacePage title="Collect student fee" description="Search a student, review assigned fees, set the payable amount and record a manual payment." action={<Button variant="outline" onClick={()=>go('fee-history.html')}>Payment history</Button>}>
     <div className="fee-collection-layout">
-      <Card className="fee-search-panel"><div className="fee-panel-heading"><h2>Search student</h2><p>Find a student by name or admission number.</p></div><form onSubmit={event=>{event.preventDefault();setSearch(query);}}><Input aria-label="Student name or admission number" placeholder="Name or admission number" value={query} onChange={event=>setQuery(event.target.value)} /><Button type="submit">Search student</Button></form><div className="fee-search-results" aria-label="Student search results">{results.slice(0,40).map(row=><button key={row.id} className={`fee-student-result ${row.id===studentId?'is-selected':''}`} onClick={()=>selectStudent(row.id)}><span><strong>{row.name}</strong><small>Admission No: {row.admissionNumber} · {classLabel(state.classes.find(item=>item.id===row.classId))}</small></span><span>{row.id===studentId?'Selected':'Select'}</span></button>)}{!results.length&&<EmptyState title="No students found" />}<p className="subtle-note">{results.length>40?'Showing the first 40 matches. Narrow your search.':`${results.length} students found`}</p></div></Card>
+      <Card className="fee-search-panel"><div className="fee-panel-heading"><h2>Search student</h2><p>Find a student by name or admission number.</p></div><form onSubmit={event=>{event.preventDefault();setSearch(query);}}><Input aria-label="Student name or admission number" placeholder="Name or admission number" value={query} onChange={event=>setQuery(event.target.value)} /><Field label="Student service" name="collection-service" value={service} onChange={setService} options={serviceOptions} /><Button type="submit">Search student</Button></form><div className="fee-search-results" aria-label="Student search results">{results.slice(0,40).map(row=><button key={row.id} className={`fee-student-result ${row.id===studentId?'is-selected':''}`} onClick={()=>selectStudent(row.id)}><span><strong>{row.name}</strong><small>Admission No: {row.admissionNumber} · {classLabel(state.classes.find(item=>item.id===row.classId))} · {serviceLabel(row)}</small></span><span>{row.id===studentId?'Selected':'Select'}</span></button>)}{!results.length&&<EmptyState title="No students found" />}<p className="subtle-note">{results.length>40?'Showing the first 40 matches. Narrow your search.':`${results.length} students found`}</p></div></Card>
       <div className="fee-detail-column">{!student?<Card className="fee-detail-card"><EmptyState title="Select a student to collect fees" description="Their assigned fees, installments and payable amount will appear here." /></Card>:<>
         <Card className="fee-detail-card"><div className="fee-panel-heading fee-heading-actions"><div><h2>Student fee account</h2><p>Fees assigned according to the student’s class.</p></div><Button variant="outline" size="sm" onClick={assignFees}>Assign class fees</Button></div>
           <div className="fee-student-profile"><div><small>Student name</small><strong>{student.name}</strong></div><div><small>Admission number</small><strong>{student.admissionNumber}</strong></div><div><small>Class</small><strong>{classLabel(state.classes.find(row=>row.id===student.classId))}</strong></div><div><label htmlFor="collection-year">Academic year</label><NativeSelect id="collection-year" value={year} onChange={e=>{setYear(e.target.value);setError('');setMessage('');clearPayment();setDiscountType('none');setDiscountValue('0');}}>{state.years.filter(row=>row.schoolId===school.id).map(row=><option key={row.id}>{row.label}</option>)}</NativeSelect></div></div>
-          <div className="fee-panel-heading"><h2>Fee details</h2><p>Review category balances and installment schedules.</p></div>
-          <Records rows={assessments} pageSize={Math.max(1,assessments.length)} columns={[{title:'Fee description',cell:row=>row.category},{title:'Payment type',cell:row=>row.installments.length===1?'Full payment':'Installment'},{title:'Installments',cell:row=><Button variant="link" size="sm" onClick={()=>setInstallmentId(row.id)}>{row.installments.length} · View</Button>},{title:'Status',cell:row=>{const paid=categoryPaid(row.installments.map(item=>item.id));return <Status kind={paid>=row.amountPaise?'success':'warning'}>{paid>=row.amountPaise?'Paid':paid?'Partial':'Pending'}</Status>;}},{title:'Amount',cell:row=>money(row.amountPaise)}]} />
+          <div className="fee-service-profile"><StudentServiceDetails student={student} /><Button variant="link" onClick={()=>go('student-details.html',{id:student.id})}>View student details</Button></div><div className="fee-panel-heading"><h2>Fee details</h2><p>Review category balances and installment schedules.</p></div>
+          <Records rows={assessments} pageSize={Math.max(1,assessments.length)} columns={[{title:'Fee description',cell:row=><div className="record-identity"><strong>{row.category}</strong><small>{row.service==='hostel'?'Hostel fee':row.service==='transport'?'Transport fee':'General fee'}</small></div>},{title:'Payment type',cell:row=>row.installments.length===1?'Full payment':'Installment'},{title:'Installments',cell:row=><Button variant="link" size="sm" onClick={()=>setInstallmentId(row.id)}>{row.installments.length} · View</Button>},{title:'Status',cell:row=>{const paid=categoryPaid(row.installments.map(item=>item.id));return <Status kind={paid>=row.amountPaise?'success':'warning'}>{paid>=row.amountPaise?'Paid':paid?'Partial':'Pending'}</Status>;}},{title:'Amount',cell:row=>money(row.amountPaise)}]} />
           <dl className="fee-original-totals"><div><dt>Total fee</dt><dd>{money(assessed)}</dd></div><div><dt>Already paid</dt><dd>{money(paid)}</dd></div><div><dt>Pending before discount</dt><dd>{money(pending)}</dd></div><div className="discount-total"><dt>Discount</dt><dd>{money(Math.max(0,discount))}</dd></div><div className="payable-total"><dt>Payable now</dt><dd>{money(account?balance:Math.max(0,pending-discount))}</dd></div></dl>
         </Card>
         {error&&<Message error>{error}</Message>}{message&&<Message>{message}</Message>}

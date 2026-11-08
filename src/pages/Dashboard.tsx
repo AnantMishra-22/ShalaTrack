@@ -32,6 +32,8 @@ const modules = [
 
   { title: 'Students', detail: 'Profiles & enrollment', path: 'students.html', icon: GroupIcon },
 
+  { title: 'Hostel students', detail: 'Rooms & hostel enrollment', path: 'hostel-students.html', icon: GroupIcon },
+  { title: 'Transport students', detail: 'Routes & pickup stops', path: 'transport-students.html', icon: GroupIcon },
   { title: 'Teachers', detail: 'Staff & assignments', path: 'teachers.html', icon: UserIcon },
 
   { title: 'Classes', detail: 'Classes & sections', path: 'classses.html', icon: GraduationCapIcon },

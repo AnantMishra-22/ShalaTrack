@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { useWorkspace } from '../data/WorkspaceStore';
 import { classLabel, id, type Student, type Teacher, type ClassSection, type Subject } from '../domain/model';
 import type { DemoSchool } from '../domain/dashboard';
+import { matchesService, serviceLabel, validateStudentServices } from '../domain/studentServices';
+import { StudentServiceFields, type ServiceFormValues } from '../components/StudentServices';
 import { replaceTeachingAssignment } from '../domain/parity';
 import { go, parameter } from '../lib/routes';
 import { Button } from '../components/ui/button';
@@ -17,7 +19,7 @@ const config = {
   subject: { plural: 'Subjects', path: 'subjects.html', description: 'Subjects and the teachers assigned to them.' },
 };
 export function EntityList({ kind, school }: { kind: EntityKind; school: DemoSchool }) {
-  const { state } = useWorkspace(); const [search, setSearch] = useState(''); const [status, setStatus] = useState('active'); const [classFilter, setClassFilter] = useState('');
+  const { state } = useWorkspace(); const [search, setSearch] = useState(''); const [status, setStatus] = useState('active'); const [classFilter, setClassFilter] = useState(''); const [serviceFilter,setServiceFilter]=useState('all');
   const classes = state.classes.filter(row => row.schoolId === school.id);
   const teachers = state.teachers.filter(row => row.schoolId === school.id);
   const assignments = state.assignments.filter(row => row.schoolId === school.id);
@@ -27,16 +29,17 @@ export function EntityList({ kind, school }: { kind: EntityKind; school: DemoSch
   if (kind === 'class') rows = classes.map(row => ({ id:row.id, title:classLabel(row), subtitle:row.year, group:teachers.find(item=>item.id===row.teacherId)?.name || 'Not assigned', extra:`${state.students.filter(item=>item.schoolId===school.id&&item.classId===row.id&&item.status==='active').length} students`, status:row.status, classIds:[row.id] }));
   if (kind === 'subject') rows = state.subjects.filter(row=>row.schoolId===school.id).map(row => { const assigned=assignments.filter(item=>item.subjectId===row.id); return {id:row.id,title:row.name,subtitle:row.code,group:`${new Set(assigned.map(item=>item.classId)).size} classes`,extra:`${new Set(assigned.map(item=>item.teacherId)).size} teachers`,status:row.status,classIds:assigned.map(item=>item.classId)}; });
   const total = rows.length; const active = rows.filter(row=>row.status==='active').length;
-  const filtered = rows.filter(row => (!status||row.status===status)&&(!classFilter||row.classIds.includes(classFilter))&&`${row.title} ${row.subtitle} ${row.group} ${row.extra}`.toLowerCase().includes(search.toLowerCase()));
+  const filtered = rows.filter(row => (kind!=='student'||matchesService(state.students.find(item=>item.id===row.id)!,serviceFilter))&&(!status||row.status===status)&&(!classFilter||row.classIds.includes(classFilter))&&`${row.title} ${row.subtitle} ${row.group} ${row.extra}`.toLowerCase().includes(search.toLowerCase()));
   return <WorkspacePage title={config[kind].plural} description={config[kind].description} action={<Button onClick={()=>go(`add-${kind}.html`)}><PlusIcon />Add {kind}</Button>}>
     <div className="inline-summary"><span><strong>{active}</strong> active {config[kind].plural.toLowerCase()}</span><span>{total-active} archived</span></div>
-    <div className="records-toolbar"><SearchField value={search} onChange={setSearch} label={`Search ${config[kind].plural.toLowerCase()}`} />{(kind==='student'||kind==='subject')&&<NativeSelect aria-label="Class filter" value={classFilter} onChange={e=>setClassFilter(e.target.value)}><option value="">All classes</option>{classes.map(row=><option key={row.id} value={row.id}>{classLabel(row)}</option>)}</NativeSelect>}<NativeSelect aria-label="Record status" value={status} onChange={e=>setStatus(e.target.value)}><option value="active">Active</option><option value="archived">Archived</option><option value="">All statuses</option></NativeSelect></div>
+    <div className="records-toolbar"><SearchField value={search} onChange={setSearch} label={`Search ${config[kind].plural.toLowerCase()}`} />{(kind==='student'||kind==='subject')&&<NativeSelect aria-label="Class filter" value={classFilter} onChange={e=>setClassFilter(e.target.value)}><option value="">All classes</option>{classes.map(row=><option key={row.id} value={row.id}>{classLabel(row)}</option>)}</NativeSelect>}{kind==='student'&&<NativeSelect aria-label="Student service filter" value={serviceFilter} onChange={e=>setServiceFilter(e.target.value)}><option value="all">All students</option><option value="hostel">Hostel students</option><option value="transport">Transport students</option><option value="both">Hostel + transport</option><option value="neither">Neither service</option></NativeSelect>}<NativeSelect aria-label="Record status" value={status} onChange={e=>setStatus(e.target.value)}><option value="active">Active</option><option value="archived">Archived</option><option value="">All statuses</option></NativeSelect></div>
     <Records rows={filtered} columns={[
       {title:kind==='class'?'Class':kind==='subject'?'Subject':'Name',cell:row=><div className="record-identity"><strong>{row.title}</strong><small>{row.subtitle}</small></div>},
       {title:kind==='student'?'Class':kind==='teacher'?'Email':kind==='class'?'Class teacher':'Classes',cell:row=>row.group},
       {title:kind==='student'?'Guardian':kind==='teacher'?'Mobile':kind==='class'?'Enrollment':'Teachers',cell:row=>row.extra,className:'hide-on-phone'},
+      ...(kind==='student'?[{title:'Services',cell:(row:typeof filtered[number])=>serviceLabel(state.students.find(item=>item.id===row.id)!)}]:[]),
       {title:'Status',cell:row=><Status kind={row.status==='active'?'success':'neutral'}>{row.status==='active'?'Active':'Archived'}</Status>,className:'hide-on-phone'},
-      {title:'Actions',cell:row=><Button variant="outline" size="sm" onClick={()=>go(`edit-${kind}.html`,{id:row.id})}>Edit</Button>},
+      {title:'Actions',cell:row=><div className="row-actions">{kind==='student'&&<Button variant="outline" size="sm" onClick={()=>go('student-details.html',{id:row.id})}>Details</Button>}<Button variant="outline" size="sm" onClick={()=>go(`edit-${kind}.html`,{id:row.id})}>Edit</Button></div>},
     ]} />
   </WorkspacePage>;
 }
@@ -49,7 +52,8 @@ export function EntityEditor({ kind, school, edit = false }: { kind: EntityKind;
   const firstAssignment=subjectAssignments.find(row=>row.id===parameter('assignment'))||subjectAssignments[0];
   const [assignmentId,setAssignmentId]=useState(firstAssignment?.id||'new');
   const student=kind==='student'?record as Student|undefined:undefined; const teacher=kind==='teacher'?record as Teacher|undefined:undefined; const schoolClass=kind==='class'?record as ClassSection|undefined:undefined; const subject=kind==='subject'?record as Subject|undefined:undefined;
-  const [values,setValues]=useState<Record<string,string>>({
+  const [values,setValues]=useState<Record<string,string>&ServiceFormValues>({
+    hostelEnabled:student?.hostel?.enrolled||(!edit&&parameter('service')==='hostel')?'yes':'no',hostelBuilding:student?.hostel?.building||'',hostelRoom:student?.hostel?.room||'',hostelAdmittedOn:student?.hostel?.admittedOn||'2026-11-02',transportEnabled:student?.transport?.enrolled||(!edit&&parameter('service')==='transport')?'yes':'no',transportRoute:student?.transport?.route||'',transportStop:student?.transport?.stop||'',transportVehicle:student?.transport?.vehicle||'',transportStartsOn:student?.transport?.startsOn||'2026-11-02',
     name:student?.name||teacher?.name||subject?.name||'', admissionNumber:student?.admissionNumber||'', gender:student?.gender||teacher?.gender||'', classId:student?.classId||firstAssignment?.classId||'', guardianName:student?.guardianName||'', phone:student?.phone||teacher?.phone||'', consent:student?.consent===false?'no':'yes', employeeCode:teacher?.employeeCode||'', email:teacher?.email||'', grade:schoolClass?.grade||'', section:schoolClass?.section||'A', year:schoolClass?.year||'2026-27', teacherId:schoolClass?.teacherId||firstAssignment?.teacherId||'', code:subject?.code||'',
   });
   const [error,setError]=useState(''); const [confirm,setConfirm]=useState(false); const [message,setMessage]=useState('');
@@ -69,7 +73,8 @@ export function EntityEditor({ kind, school, edit = false }: { kind: EntityKind;
           if(!value.admissionNumber)throw new Error('Enter an admission number.');
           if(draft.students.some(row=>row.schoolId===school.id&&row.admissionNumber.toLowerCase()===value.admissionNumber.toLowerCase()&&row.id!==nextId))throw new Error('This admission number is already in use.');
           if(!classes.some(row=>row.id===value.classId))throw new Error('Choose an active class and section.');
-          const row:Student={id:nextId,schoolId:school.id,admissionNumber:value.admissionNumber,name:value.name,gender:value.gender,classId:value.classId,guardianName:value.guardianName,phone:value.phone,consent:value.consent==='yes',status};
+          const row:Student={id:nextId,schoolId:school.id,admissionNumber:value.admissionNumber,name:value.name,gender:value.gender,classId:value.classId,guardianName:value.guardianName,phone:value.phone,consent:value.consent==='yes',status,hostel:{enrolled:value.hostelEnabled==='yes',building:value.hostelBuilding,room:value.hostelRoom,admittedOn:value.hostelAdmittedOn},transport:{enrolled:value.transportEnabled==='yes',route:value.transportRoute,stop:value.transportStop,vehicle:value.transportVehicle,startsOn:value.transportStartsOn}};
+          validateStudentServices(row);
           draft.students=draft.students.filter(item=>item.id!==nextId);draft.students.push(row);
         }
         if(kind==='teacher'){
@@ -117,6 +122,7 @@ export function EntityEditor({ kind, school, edit = false }: { kind: EntityKind;
       {kind==='subject'&&edit&&<Field label="Teaching assignment" name="teaching-assignment" value={assignmentId} onChange={value=>{setAssignmentId(value);const row=subjectAssignments.find(item=>item.id===value);setValues(previous=>({...previous,classId:row?.classId||'',teacherId:row?.teacherId||''}));}} options={[...subjectAssignments.map(row=>({value:row.id,label:`${classLabel(classes.find(item=>item.id===row.classId))} / ${teachers.find(item=>item.id===row.teacherId)?.name||'Archived teacher'}`})),{value:'new',label:'Add another class assignment'}]} />}
       {kind==='subject'&&<Field label="Subject code" name="code" value={values.code} onChange={change('code')} required />}
       {(kind==='class'||kind==='subject')&&<Field label={kind==='class'?'Class teacher':'Assigned teacher'} name="teacherId" value={values.teacherId} onChange={change('teacherId')} options={teachers.map(row=>({value:row.id,label:row.name}))} required />}
+      {kind==='student'&&<StudentServiceFields values={values} onChange={change} />}
     </FormCard>
     {edit&&<div className="editor-secondary-actions"><Button variant="outline" onClick={()=>setConfirm(true)}>{record?.status==='active'?`Archive ${kind}`:`Restore ${kind}`}</Button>{kind==='teacher'&&<Button variant="outline" onClick={()=>{commit(school.id,'Invitation simulated',values.email,draft=>{const row=draft.teachers.find(item=>item.id===recordId&&item.schoolId===school.id);if(row)row.invitation='invited';});setMessage('Invitation reset simulated. No email was sent.');}}>Simulate reset invitation</Button>}{message&&<Message>{message}</Message>}</div>}
     <Confirm open={confirm} onClose={()=>setConfirm(false)} title={`${record?.status==='active'?'Archive':'Restore'} ${kind}?`} description={record?.status==='active'?'The profile will leave active lists. Attendance and fee history will be retained.':'The profile will return to active lists.'} label={record?.status==='active'?'Archive record':'Restore record'} onConfirm={archive} />

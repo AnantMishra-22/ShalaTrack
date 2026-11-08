@@ -29,7 +29,7 @@ export function createDemoState(): DemoState {
       const classIndex = s === 'maplewood' ? Math.floor(i / 25) : (i < 92 ? Math.floor(i / 23) : 4 + Math.floor((i - 92) / 22));
       const studentId = `${s}-student-${i + 1}`;
       const student = { id: studentId, schoolId: s, admissionNumber: `ST${String(i + 1).padStart(4, '0')}`, name: `${firstNames[i % firstNames.length]} ${surnames[Math.floor(i / firstNames.length) % surnames.length]}`, gender: i % 2 ? 'Female' : 'Male', classId: `${s}-class-${classIndex + 1}`, guardianName: `${i % 2 ? 'Priya' : 'Rajesh'} ${surnames[Math.floor(i / firstNames.length) % surnames.length]}`, phone: `900000${String(i + 1).padStart(4, '0')}`, consent: i % 31 !== 0, status: 'active' as const };
-      state.students.push(student);
+      state.students.push({...student,hostel:{enrolled:i%8===0,building:i%16===0?'North hostel':'South hostel',room:`${100+i%20}`,admittedOn:'2026-06-01'},transport:{enrolled:i%5===0,route:i%10===0?'Route A':'Route B',stop:i%10===0?'Central stop':'Market stop',vehicle:i%10===0?'DEMO-BUS-01':'DEMO-BUS-02',startsOn:'2026-06-01'}});
       for (const plan of state.feePlans.filter(row => row.schoolId === s && row.classId === student.classId)) {
         const assessment = { id: `${studentId}-assessment-${plan.category}`, schoolId: s, studentId, year: '2026-27', planId: plan.id, category: plan.category, amountPaise: plan.amountPaise, installments: plan.installments.map((installment, index) => ({ ...installment, id: `${studentId}-${plan.category}-${index}` })) };
         state.assessments.push(assessment);

@@ -9,7 +9,7 @@ const server=await createServer({cacheDir:`.tools/render-cache-${process.pid}`,o
 try {
   const {renderRoute}=await server.ssrLoadModule('/tests/render-harness.tsx');
   const {pages}=await server.ssrLoadModule('/src/data/pages.ts');
-  test('all 43 route components render their primary heading without runtime errors',()=>{
+  test('all 46 route components render their primary heading without runtime errors',()=>{
     for(const page of pages){
       window.location.hash=`#/${page.path}`;
       const html=renderRoute(page.path);
@@ -43,6 +43,17 @@ try {
     window.location.hash='#/fee-dashboard.html?class=1&year=2026-27';const detail=renderRoute('fee-dashboard.html');
     assert.ok(detail.includes('Student fees'));assert.ok(detail.includes('All classes'));assert.ok(detail.includes('ST0001'));assert.ok(detail.includes('Open account'));
     assert.ok(!detail.includes('ST0026'));
+  });
+  test('hostel and transport pages, student details and service fee controls render',()=>{
+    for(const service of ['hostel','transport']){
+      window.location.hash=`#/${service}-students.html`;
+      const html=renderRoute(`${service}-students.html`);assert.ok(html.includes(service==='hostel'?'Hostel / room':'Route / stop'));assert.ok(html.includes('ST0001'));
+      window.location.hash=`#/add-student.html?service=${service}`;const add=renderRoute('add-student.html');assert.ok(add.includes(service==='hostel'?'hostel-building':'transport-route'));
+    }
+    window.location.hash='#/student-details.html?id=maplewood-student-1';const detail=renderRoute('student-details.html');assert.ok(detail.includes('North hostel'));assert.ok(detail.includes('Route A'));
+    window.location.hash='#/fee-structure.html?service=hostel';const plans=renderRoute('fee-structure.html');assert.ok(plans.includes('fee-plan-service-filter'));assert.ok(plans.includes('Hostel fees'));
+    window.location.hash='#/fee-collection.html?student=maplewood-student-1';assert.ok(renderRoute('fee-collection.html').includes('North hostel'));
+    window.location.hash='#/fee-dashboard.html?service=hostel&class=1';assert.ok(renderRoute('fee-dashboard.html').includes('Services'));
   });
 } finally { await server.close(); }
 

@@ -1,5 +1,6 @@
 import type { DemoSchool } from '../domain/dashboard';
 import type { PreviewSession } from '../data/demoRepository';
+import { ServiceStudentsPage, StudentDetailsPage } from './StudentServicePages';
 import { EntityEditor, EntityList, type EntityKind } from './RecordsPages';
 import { TimetablePage, AcademicYearsPage, AssignedClassesPage, AssignedSubjectsPage } from './AcademicPages';
 import { StudentAttendancePage, CorrectionsPage, AttendanceHistoryPage, TeacherAttendancePage, QrDisplayPage, SelfAttendancePage, AbsentAlertsPage } from './AttendancePages';
@@ -15,6 +16,9 @@ export function WorkspaceRouter({path,school,session,teacherId,onSignOut}:{path:
   const editor=path.match(/^(add|edit)-(student|teacher|class|subject)\.html$/);
   if(editor)return <EntityEditor kind={editor[2] as EntityKind} edit={editor[1]==='edit'} school={school} />;
   switch(path){
+    case 'hostel-students.html':return <ServiceStudentsPage school={school} service="hostel" />;
+    case 'transport-students.html':return <ServiceStudentsPage school={school} service="transport" />;
+    case 'student-details.html':return <StudentDetailsPage school={school} />;
     case 'students.html':return <EntityList kind="student" school={school} />;
     case 'teachers.html':return <EntityList kind="teacher" school={school} />;
     case 'classses.html':return <EntityList kind="class" school={school} />;

@@ -16,6 +16,8 @@ import type { Notice } from '../domain/model';
 const navigation = [
   { label: 'Overview', path: 'admin.html', icon: HomeIcon, group: 'main' },
   { label: 'Students', path: 'students.html', icon: GroupIcon, group: 'main' },
+  { label: 'Hostel students', path: 'hostel-students.html', icon: HomeIcon, group: 'main' },
+  { label: 'Transport students', path: 'transport-students.html', icon: GroupIcon, group: 'main' },
   { label: 'Teachers', path: 'teachers.html', icon: UserIcon, group: 'main' },
   { label: 'Classes', path: 'classses.html', icon: GraduationCapIcon, group: 'main' },
   { label: 'Subjects', path: 'subjects.html', icon: BookIcon, group: 'main' },

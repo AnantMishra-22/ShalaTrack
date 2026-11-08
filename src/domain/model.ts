@@ -1,7 +1,10 @@
 import type { PeriodSession } from './dashboard';
 export type RecordStatus = 'active' | 'archived';
 export interface Owned { id: string; schoolId: string; }
-export interface Student extends Owned { admissionNumber: string; name: string; gender: string; classId: string; guardianName: string; phone: string; consent: boolean; status: RecordStatus; }
+export type StudentService = 'all'|'hostel'|'transport';
+export interface HostelDetails { enrolled:boolean; building:string; room:string; admittedOn:string; }
+export interface TransportDetails { enrolled:boolean; route:string; stop:string; vehicle:string; startsOn:string; }
+export interface Student extends Owned { admissionNumber: string; name: string; gender: string; classId: string; guardianName: string; phone: string; consent: boolean; status: RecordStatus; hostel?: HostelDetails; transport?: TransportDetails; }
 export interface Teacher extends Owned { employeeCode: string; name: string; gender: string; email: string; phone: string; status: RecordStatus; invitation: 'invited' | 'accepted'; }
 export interface ClassSection extends Owned { grade: string; section: string; year: string; teacherId: string; status: RecordStatus; }
 export interface Subject extends Owned { name: string; code: string; status: RecordStatus; }
@@ -14,12 +17,12 @@ export interface AttendanceSession extends PeriodSession { classId: string; scho
 export interface Correction extends Owned { sessionId: string; baseVersion: number; changes: Mark[]; reason: string; requestedBy: string; status: 'pending' | 'approved' | 'rejected'; approvedBy?: string; }
 export interface QrChallenge extends Owned { token: string; expiresAt: number; }
 export interface CheckIn extends Owned { teacherId: string; schoolDate: string; status: 'present' | 'absent'; at: string; method: 'sample_qr' | 'sample_record'; }
-export interface FeePlan extends Owned { classId: string; year: string; category: string; amountPaise: number; installments: { due: string; amountPaise: number }[]; paymentMethod: string; version: number; }
-export interface Assessment extends Owned { studentId: string; year: string; planId: string; category: string; amountPaise: number; installments: { id: string; due: string; amountPaise: number }[]; }
+export interface FeePlan extends Owned { appliesTo?: StudentService; classId: string; year: string; category: string; amountPaise: number; installments: { due: string; amountPaise: number }[]; paymentMethod: string; version: number; }
+export interface Assessment extends Owned { service?: StudentService; studentId: string; year: string; planId: string; category: string; amountPaise: number; installments: { id: string; due: string; amountPaise: number }[]; }
 export interface FeeAccount extends Owned { studentId: string; year: string; discountType: 'none'|'amount'|'percentage'; discountValue: number; discountPaise: number; paidAtSetup: number; }
 export interface Concession extends Owned { studentId: string; year: string; amountPaise: number; reason: string; }
 export interface Allocation { installmentId: string; amountPaise: number; }
-export interface Payment extends Owned { studentId: string; year: string; amountPaise: number; method: string; reference: string; paymentDate: string; recordedAt: string; receiptNumber: string; studentName: string; admissionNumber: string; className: string; allocations: Allocation[]; assessedPaise?: number; previousPaidPaise?: number; discountPaise?: number; balancePaise?: number; category?: string; }
+export interface Payment extends Owned { studentId: string; year: string; amountPaise: number; method: string; reference: string; paymentDate: string; recordedAt: string; receiptNumber: string; studentName: string; admissionNumber: string; className: string; allocations: Allocation[]; assessedPaise?: number; previousPaidPaise?: number; discountPaise?: number; balancePaise?: number; category?: string; service?: StudentService; }
 export interface Reversal extends Owned { paymentId: string; amountPaise: number; reason: string; at: string; }
 export interface LedgerEntry extends Owned { studentId: string; year: string; amountPaise: number; kind: 'assessment' | 'payment' | 'concession' | 'reversal'; sourceId: string; at: string; }
 export interface Notice extends Owned { title: string; body: string; audience: 'all_teachers' | 'selected_teachers'; teacherIds: string[]; publishedAt: string; author: string; }

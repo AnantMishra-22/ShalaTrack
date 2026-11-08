@@ -6,9 +6,9 @@ All 39 original destinations have React implementations. The four backend-aligne
 | --- | --- | --- |
 | `index.html` | Sign in | Admin and teacher roles; Email and password; Password visibility |
 | `admin.html` | School overview | School overview; Student attendance; Module shortcuts; Teacher attendance; Recent activity |
-| `students.html` | Students | Student search; Class filter; Student count; Add and edit student |
-| `add-student.html` | Add student | Admission number; Name and gender; Class and section; Guardian name and mobile; Validation |
-| `edit-student.html` | Edit student | Edit student details; Save changes; Archive and restore confirmation |
+| `students.html` | Students | Student search; Class filter; Student count; Hostel and transport filters; Student details; Add and edit student |
+| `add-student.html` | Add student | Admission number; Name and gender; Class and section; Guardian name and mobile; Hostel and transport enrollment details; Validation |
+| `edit-student.html` | Edit student | Edit student and service details; Save changes; Archive and restore confirmation |
 | `teachers.html` | Teachers | Teacher search; Active teachers; Add and edit teacher |
 | `add-teacher.html` | Add teacher | Employee code; Name and gender; Mobile and email; Account invitation replacing administrator-set passwords |
 | `edit-teacher.html` | Edit teacher | Edit teacher details; Reset invitation; Archive and restore confirmation |
@@ -19,10 +19,10 @@ All 39 original destinations have React implementations. The four backend-aligne
 | `add-subject.html` | Add subject | Name; Code; Class and section; Assigned teacher; Save subject |
 | `edit-subject.html` | Edit subject | Edit subject; Save changes; Archive and restore confirmation |
 | `attendance.html` | Teacher attendance | Attendance date; Teacher statuses; Refresh; QR verification context |
-| `fee-dashboard.html` | Fee overview | School fee summary cards; Cumulative class totals across sections; Student drill-down and fee accounts; Category and status filters; Record payment |
-| `fee-structure.html` | Fee structure | Academic year; Class and fee category; Payment schedule; Installments; Fee totals |
-| `fee-collection.html` | Collect fees | Student lookup; One-time payable setup and locked discount; Category allocations; Cash, UPI and bank reference; Payment date; Print receipt |
-| `fee-history.html` | Fee history | Search; Class, payment mode and date filters; Payment details; Receipt lookup |
+| `fee-dashboard.html` | Fee overview | School fee summary cards; Cumulative class totals across sections; Student drill-down and fee accounts; Category, service and status filters; Record payment |
+| `fee-structure.html` | Fee structure | Academic year; Class and fee category; Service-specific eligibility; Payment schedule; Installments; Fee totals |
+| `fee-collection.html` | Collect fees | Student lookup and service filter; Hostel and transport profile; One-time payable setup and locked discount; Category allocations; Cash, UPI and bank reference; Payment date; Print receipt |
+| `fee-history.html` | Fee history | Search; Class, payment mode and date filters; Payment details and service filter; Receipt lookup |
 | `notices.html` | Notices | Notice list; Audience; Published date; Create notice |
 | `create-notice.html` | Create notice | Title and message; All or selected teachers; Publish confirmation |
 | `whatsapp.html` | WhatsApp broadcast | Subject and message; Recipient count; Message preview; Send confirmation; Delivery results |
@@ -48,6 +48,9 @@ All 39 original destinations have React implementations. The four backend-aligne
 
 | Route | Page | Frontend features |
 | --- | --- | --- |
+| `hostel-students.html` | Hostel students | Hostel enrollment; Class and building filters; Rooms and admission dates; Fee account links |
+| `transport-students.html` | Transport students | Transport enrollment; Class and route filters; Stops and vehicles; Fee account links |
+| `student-details.html` | Student details | Guardian details; Hostel and transport details; Edit enrollment; Fee account links |
 | `timetable` | Timetable | Academic year; Period slots; Teacher assignments; Schedule conflicts |
 | `academic-years` | Academic years | Current year; Year dates; Closed-year history |
 | `attendance-corrections` | Attendance corrections | Requested changes; Reasons; Approval and revision history |

@@ -30,9 +30,9 @@ test('unsubmitted periods are never counted as absent', () => {
 test('submitted sample period counts reconcile', () => {
   for(const row of domain.demoSessions.filter(row=>row.status==='submitted')) assert.equal(row.present+row.absent+row.late,row.rosterSize);
 });
-test('39 original pages and four additions have unique routes', () => {
-  assert.equal(catalog.originalPages.length,39);assert.equal(catalog.addedPages.length,4);
-  assert.equal(new Set(catalog.pages.map(page=>page.path)).size,43);
+test('39 original pages and service additions have unique routes', () => {
+  assert.equal(catalog.originalPages.length,39);assert.equal(catalog.addedPages.length,7);
+  assert.equal(new Set(catalog.pages.map(page=>page.path)).size,46);
   assert.equal(catalog.originalPages.filter(page=>page.path.startsWith('teacher-screens/')).length,11);
 });
 test('seeded individual marks match frozen school rosters and dashboard totals', () => {
@@ -156,4 +156,33 @@ test('fully discounted fees are paid without dividing by zero; unassessed fees s
   assert.equal(feeOverview.feeStatus(full),'Paid');assert.equal(feeOverview.collectionRate(full),100);
   const empty={gross:0,discount:0,net:0,collected:0,outstanding:0,students:1};
   assert.equal(feeOverview.feeStatus(empty),'Not assessed');assert.equal(feeOverview.collectionRate(empty),0);
+});
+
+const studentServices = await sourceModule('../src/domain/studentServices.ts');
+test('service enrollment supports both services and legacy students default to neither',()=>{
+  assert.ok(studentServices.matchesService({},'neither'));
+  const student={hostel:{enrolled:true},transport:{enrolled:true}};
+  assert.ok(studentServices.matchesService(student,'hostel'));assert.ok(studentServices.matchesService(student,'transport'));assert.ok(studentServices.matchesService(student,'both'));assert.equal(studentServices.serviceLabel(student),'Hostel + transport');
+  assert.throws(()=>studentServices.validateStudentServices({hostel:{enrolled:true,building:'',admittedOn:''}}),/hostel/);
+  assert.throws(()=>studentServices.validateStudentServices({transport:{enrolled:true,route:'',stop:'',startsOn:''}}),/transport/);
+});
+test('service plans assess only enrolled students, remain idempotent and retain existing liabilities after opt-out',()=>{
+  const state=createDemoState(),hostel=state.students[0],other=state.students[1];let sequence=0;const makeId=prefix=>`${prefix}-${++sequence}`;
+  const plan={id:'hostel-plan',schoolId:'maplewood',classId:hostel.classId,year:'2026-27',category:'Hostel',amountPaise:100000,installments:[{due:'2026-11-01',amountPaise:100000}],paymentMethod:'Any manual method',version:1,appliesTo:'hostel'};state.feePlans.push(plan);
+  const before=operations.accountBalance(state,'maplewood',hostel.id,'2026-27');
+  assert.equal(studentServices.assessStudentPlan(state,'maplewood',other.id,plan,makeId,'now'),false);
+  assert.equal(studentServices.assessStudentPlan(state,'riverdale',hostel.id,plan,makeId,'now'),false);
+  assert.equal(studentServices.assessStudentPlan(state,'maplewood',hostel.id,plan,makeId,'now'),true);
+  assert.equal(studentServices.assessStudentPlan(state,'maplewood',hostel.id,plan,makeId,'now'),false);
+  const assessment=state.assessments.find(row=>row.planId===plan.id);assert.equal(assessment.service,'hostel');
+  hostel.hostel.enrolled=false;
+  assert.equal(operations.accountBalance(state,'maplewood',hostel.id,'2026-27'),before+100000);
+  assert.equal(studentServices.paymentServices({schoolId:'maplewood',studentId:hostel.id,year:'2026-27',allocations:[{installmentId:assessment.installments[0].id,amountPaise:100000}]},state.assessments)[0],'hostel');
+});
+test('service fee overview cohorts reconcile and service filtering isolates school accounts',()=>{
+  const state=createDemoState();const all=feeOverview.classFeeOverview(state,'maplewood','2026-27'),hostel=feeOverview.classFeeOverview(state,'maplewood','2026-27','hostel'),transport=feeOverview.classFeeOverview(state,'maplewood','2026-27','transport');
+  assert.equal(all.totals.students,200);assert.equal(hostel.totals.students,25);assert.equal(transport.totals.students,40);
+  assert.equal(hostel.totals.net,hostel.totals.collected+hostel.totals.outstanding);
+  assert.ok(hostel.accounts.every(row=>row.id.startsWith('maplewood-')));
+  assert.ok(hostel.accounts.every(row=>row.services.includes('Hostel')));
 });

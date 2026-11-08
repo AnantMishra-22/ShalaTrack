@@ -52,3 +52,9 @@ Browser visual/interaction verification remains unavailable following the earlie
 ## Class-wise fee overview
 
 Implemented the new reference layout with cumulative grade/class rows across sections and URL-based student drill-down. Twenty domain/export tests cover aggregation, student/class/school reconciliation, discount and reversal accounting, year/school isolation and zero-payable statuses. A route-render check verifies the default class list and the student breakdown. Actual browser visual/interaction checks remain unavailable under the earlier URL-policy block.
+
+## Hostel and transport administration
+
+Added two administrator service pages and a student details page, bringing the route inventory to 46. Student forms and lists, service rosters, fee dashboard, collection, plan eligibility, receipts and history include service information or filters. General/hostel/transport fee plans share the existing ledger and receipt flow; only currently eligible students can receive service assessments, and duplicate categories are skipped. Historic liabilities remain after enrollment ends. Legacy students default to no enrollment without mutating their stored data.
+
+Twenty-three domain/export tests cover dual enrollment, required service details, school isolation, service fee eligibility/idempotency, retained liabilities/classifications and reconciled fee cohorts. Route-render coverage checks both service pages, addition forms, details and fee controls. The prior browser verification limitation remains.
