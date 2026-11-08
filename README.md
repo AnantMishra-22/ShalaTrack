@@ -10,9 +10,9 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:5173/#/admin.html`. The administrator sample workspace opens by default. Sign out from the account menu to try the teacher preview. No real credentials are needed: use a sample email and any fictional password of six or more characters. Passwords are never saved.
+Open `http://localhost:5173/#/admin.html`. The sign-in preview opens when there is no saved session. Choose Admin or Teacher to enter the matching sample workspace. No real credentials are needed: use a known sample email and any fictional password of six or more characters. Passwords are never saved.
 
-Useful teacher emails: `teacher1@maplewood.example` (submitted periods), `teacher7@maplewood.example` (pending period 3), and `teacher12@maplewood.example` (no arrival record). Sample accounts are a role preview, not authentication. The school switcher changes the fictional school context.
+Useful teacher emails: `teacher1@maplewood.example` (submitted periods), `teacher7@maplewood.example` (pending period 3), and `teacher12@maplewood.example` (no arrival record). Sample accounts are a role preview, not authentication. Administrators can switch fictional schools; teacher previews stay attached to their school.
 
 ```powershell
 npm run build
@@ -55,3 +55,11 @@ The generated component registry is under `src/components/ui`; only imported com
 ## Vercel
 
 Use the repository root as the Root Directory, the Vite framework preset, `npm ci` as the Install Command, `npm run build` as the Build Command, and `dist` as the Output Directory. The GitHub repository contains the Redesign directory contents at its root. Redeploy the latest `main` commit after dependency changes. No production service environment variables are needed for this sample-data frontend.
+
+## Original workflow parity (8 November 2026)
+
+The fee collection page follows the original two-column student-search/account layout: assigned categories and installment details, total/already-paid/pending/discount/payable summary, then Step 1 (save and lock the one-time student discount) and Step 2 (collect a category payment and issue a receipt). Existing local concessions migrate to locked setups without applying them again. Setup is required even with no discount. Receipt snapshots include the saved discount and remaining balance.
+
+Original directory reports and gender/contact/assignment fields are restored alongside the separate period-attendance report. Teacher reports include an on-screen monthly register. Class-teacher assignments drive My classes; subject assignments can be explicitly selected and replaced. Grades 11/12 MPC, BiPC and CEC and planned academic-year preparation are restored. Individual and bulk absence-alert simulations include progress and deduplication. Legacy HTML URLs have Vercel rewrites into the React entry point.
+
+Real authentication, provider messaging and server QR verification remain outside this frontend phase. The reproducible demo day and the agreed per-period attendance, QR check-in, archive/restore and manual cash/UPI/bank scope remain in place.

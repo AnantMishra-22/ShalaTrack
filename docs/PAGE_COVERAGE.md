@@ -21,16 +21,16 @@ All 39 original destinations have React implementations. The four backend-aligne
 | `attendance.html` | Teacher attendance | Attendance date; Teacher statuses; Refresh; QR verification context |
 | `fee-dashboard.html` | Fee overview | Assessed fees; Collections; Outstanding balances; Class, category and status filters; Record payment |
 | `fee-structure.html` | Fee structure | Academic year; Class and fee category; Payment schedule; Installments; Fee totals |
-| `fee-collection.html` | Collect fees | Student lookup; Concessions; Category allocations; Cash, UPI and bank reference; Payment date; Print receipt |
+| `fee-collection.html` | Collect fees | Student lookup; One-time payable setup and locked discount; Category allocations; Cash, UPI and bank reference; Payment date; Print receipt |
 | `fee-history.html` | Fee history | Search; Class, payment mode and date filters; Payment details; Receipt lookup |
 | `notices.html` | Notices | Notice list; Audience; Published date; Create notice |
 | `create-notice.html` | Create notice | Title and message; All or selected teachers; Publish confirmation |
 | `whatsapp.html` | WhatsApp broadcast | Subject and message; Recipient count; Message preview; Send confirmation; Delivery results |
 | `reports.html` | Reports | Report categories; School totals; Links to detailed reports |
 | `attendance-reports.html` | Attendance reports | Search and status filters; Period attendance coverage; PDF and Excel exports |
-| `class-reports.html` | Class reports | Class search and filter; Class summaries; PDF and Excel exports |
-| `student-reports.html` | Student reports | Student search; Class filter; Student attendance; PDF export |
-| `teacher-reports.html` | Teacher reports | Teacher search; Status filter; Teacher attendance; PDF and Excel exports |
+| `class-reports.html` | Class reports | Class search and filter; Academic-year filter; Class summaries; PDF and Excel exports |
+| `student-reports.html` | Student reports | Student directory; Gender and class filters; Guardian contacts; PDF and Excel export |
+| `teacher-reports.html` | Teacher reports | Teacher directory; Gender and class filters; Contact and assignment details; PDF and Excel exports |
 | `profile.html` | School profile | School details; Administrator identity; Sign out |
 | `teacher-screens/teacher-dashboard.html` | Teacher dashboard | Assigned classes and subjects; Attendance shortcuts; Notices; Profile |
 | `teacher-screens/assigned-classes.html` | Assigned classes | Class search; Class roster; Attendance shortcut |
@@ -38,8 +38,8 @@ All 39 original destinations have React implementations. The four backend-aligne
 | `teacher-screens/self-attendance.html` | My attendance | Arrival check-in; Rotating QR scan replacing self-selected status; Verification result |
 | `teacher-screens/student-attendance.html` | Student attendance | Class, date and period selection; Student search; Mark all present or absent; Explicit roster validation; Submit confirmation |
 | `teacher-screens/attendance-history.html` | Attendance history | Search; Class and period history; Submission details |
-| `teacher-screens/absent-alerts.html` | Absence alerts | Class and student search; Refresh; Notification status |
-| `teacher-screens/reports.html` | Teacher reports | Class selection; Daily PDF; Monthly register; Period coverage |
+| `teacher-screens/absent-alerts.html` | Absence alerts | Class and student search; Refresh; Individual and bulk simulation; Progress and notification status |
+| `teacher-screens/reports.html` | Teacher reports | Class selection; Daily PDF; Monthly register preview and export; Period coverage |
 | `teacher-screens/teacher-notices.html` | Teacher notices | Authorized notice list; Notice dialog; Notice details |
 | `teacher-screens/notice-details.html` | Notice details | Full notice; Audience and date; Back navigation; Print |
 | `teacher-screens/teacher-profile.html` | Teacher profile | Profile details; Assigned subjects and classes; Sign out |

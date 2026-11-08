@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/:page.html",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/teacher-screens/:page.html",
+      "destination": "/index.html"
+    }
+  ]
+}

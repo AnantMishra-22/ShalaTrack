@@ -69,7 +69,7 @@ export function AppShell({ children, path, school, schools, onSchoolChange, sess
   const navContent = <>
     <SidebarHeader className="app-sidebar-header"><Brand homePath={teacher ? 'teacher-screens/teacher-dashboard.html' : 'admin.html'} /></SidebarHeader>
     <div className="school-switcher-wrap">
-      <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" className="school-switcher" aria-label={`Switch school, current school ${school.name}`}><span className="school-avatar">{school.initials}</span><span className="school-switcher-text">{school.name}<small>{school.location}</small></span><ArrowDownIcon /></Button></DropdownMenuTrigger>
+      <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" className="school-switcher" disabled={teacher} aria-label={`Switch school, current school ${school.name}`}><span className="school-avatar">{school.initials}</span><span className="school-switcher-text">{school.name}<small>{school.location}</small></span><ArrowDownIcon /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="school-switcher-menu"><DropdownMenuLabel>Sample schools</DropdownMenuLabel>{schools.map(item => <DropdownMenuItem key={item.id} onSelect={() => { onSchoolChange(item.id); setMobileNav(false); }}><span className="school-option">{item.name}</span>{school.id === item.id && <CheckIcon className="menu-check" />}</DropdownMenuItem>)}</DropdownMenuContent>
       </DropdownMenu>
     </div>

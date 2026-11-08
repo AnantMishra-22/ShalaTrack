@@ -1,6 +1,6 @@
 import { demoSessions, schools, summarizeAttendance, type DemoSchool, type PeriodSession, type SchoolRole } from '../domain/dashboard';
 
-export interface PreviewSession { role: SchoolRole; name: string; email: string; }
+export interface PreviewSession { role: SchoolRole; name: string; email: string; schoolId?: string; }
 export interface SchoolRepository {
   listSchools(): Promise<DemoSchool[]>;
   listAttendance(schoolId: string): Promise<PeriodSession[]>;

@@ -20,7 +20,7 @@ export function Login({ onEnter }: { onEnter: (session: PreviewSession) => void 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setErrorField('email'); setError('Enter a valid email address.'); return; }
     if (password.length < 6) { setErrorField('password'); setError('Use a sample password with at least 6 characters.'); return; }
     setError('');
-    onEnter({ role, email: email.trim(), name: role === 'admin' ? 'Aditi Sharma' : 'Kavya Rao' });
+    try { onEnter({ role, email: email.trim(), name: role === 'admin' ? 'Aditi Sharma' : 'Kavya Rao' }); } catch(err) { setErrorField('email');setError((err as Error).message); }
   }
   return <main className="login-page">
     <div className="login-story">
@@ -42,7 +42,7 @@ export function Login({ onEnter }: { onEnter: (session: PreviewSession) => void 
       <div className="login-form-wrap">
         <div className="mobile-login-brand"><Brand /></div>
         <h1>Welcome back</h1><p className="login-intro">Open your school workspace.</p>
-        <Tabs value={role} onValueChange={value => { setRole(value as SchoolRole); setEmail(value === 'admin' ? 'admin@maplewood.example' : 'teacher@maplewood.example'); setError(''); }}>
+        <Tabs value={role} onValueChange={value => { setRole(value as SchoolRole); setEmail(value === 'admin' ? 'admin@maplewood.example' : 'teacher1@maplewood.example'); setError(''); }}>
           <TabsList className="login-role-tabs" aria-label="Preview account role"><TabsTrigger value="admin">School admin</TabsTrigger><TabsTrigger value="teacher">Teacher</TabsTrigger></TabsList>
         </Tabs>
         <form onSubmit={submit} noValidate className="login-form">

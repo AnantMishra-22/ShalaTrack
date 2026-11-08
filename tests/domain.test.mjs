@@ -95,3 +95,38 @@ test('PDF export paginates long content into a real PDF', async () => {
   const doc=await exportsModule.createPdfDocument('Maplewood receipt',['Particular','Details'],[['Amount','INR 1,234.50'],['Long notice','School notice '.repeat(1200)]]);
   assert.ok(doc.getNumberOfPages()>1);const bytes=Buffer.from(doc.output('arraybuffer'));assert.equal(bytes.subarray(0,5).toString(),'%PDF-');assert.ok(bytes.length>2000);
 });
+
+const parity = await sourceModule('../src/domain/parity.ts');
+test('class teacher receives a new class without a subject assignment',()=>{
+  const state=createDemoState();state.classes.push({id:'new-class',schoolId:'maplewood',teacherId:'maplewood-teacher-12',status:'active',year:'2027-28',grade:'11 - MPC',section:'A'});
+  assert.ok(parity.teacherClassIds(state,'maplewood','maplewood-teacher-12',true).has('new-class'));
+  assert.ok(!parity.teacherClassIds(state,'riverdale','maplewood-teacher-12',true).has('new-class'));
+});
+test('reassigning a subject replaces the selected mapping and preserves other class assignments',()=>{
+  const state=createDemoState();const old=state.assignments[0],other=state.assignments.find(row=>row.subjectId===old.subjectId&&row.classId!==old.classId);
+  const before=structuredClone(other),count=state.assignments.length,oldClass=old.classId;
+  state.classes.push({id:'new-class',schoolId:old.schoolId,status:'active'});
+  parity.replaceTeachingAssignment(state,old.schoolId,old.subjectId,old.id,'new-class',old.teacherId,'unused');
+  assert.equal(state.assignments.length,count);assert.equal(old.classId,'new-class');assert.deepEqual(other,before);
+  assert.ok(!state.slots.some(row=>row.schoolId===old.schoolId&&row.classId===oldClass&&row.subjectId===old.subjectId&&row.teacherId===old.teacherId));
+});
+test('payable setup credits the discount exactly once and refuses another setup',()=>{
+  const state=parity.migrateWorkspace(createDemoState()),student=state.students[0];
+  const account={id:'setup',schoolId:student.schoolId,studentId:student.id,year:'2026-27',discountType:'percentage',discountValue:10,discountPaise:150000,paidAtSetup:500000};
+  parity.savePayableSetup(state,account,'credit','entry','2026-11-02');
+  assert.equal(operations.accountBalance(state,student.schoolId,student.id,'2026-27'),1350000);
+  assert.throws(()=>parity.savePayableSetup(state,{...account,id:'duplicate'},'credit2','entry2','now'),/already set/);
+  assert.equal(state.concessions.length,1);
+});
+test('zero-discount setup unlocks an account without creating a ledger credit',()=>{
+  const state=parity.migrateWorkspace(createDemoState()),student=state.students[0],count=state.ledger.length;
+  parity.savePayableSetup(state,{id:'setup',schoolId:student.schoolId,studentId:student.id,year:'2026-27',discountType:'none',discountValue:0,discountPaise:0,paidAtSetup:500000},'credit','entry','now');
+  assert.equal(state.feeAccounts.length,1);assert.equal(state.ledger.length,count);
+});
+test('migration preserves old credits, locks them and adds future years without closing the current year',()=>{
+  const state=createDemoState();delete state.feeAccounts;state.concessions.push({id:'existing-credit',schoolId:'maplewood',studentId:state.students[0].id,year:'2026-27',amountPaise:12345});
+  const migrated=parity.migrateWorkspace(state),again=parity.migrateWorkspace(migrated);
+  assert.equal(again.feeAccounts.length,1);assert.equal(again.feeAccounts[0].discountPaise,12345);
+  assert.equal(again.years.find(row=>row.schoolId==='maplewood'&&row.label==='2027-28').status,'planned');
+  assert.equal(again.years.find(row=>row.schoolId==='maplewood'&&row.label==='2026-27').status,'current');
+});

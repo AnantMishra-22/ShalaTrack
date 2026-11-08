@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useWorkspace } from '../data/WorkspaceStore';
 import { classLabel, id, type Student, type Teacher, type ClassSection, type Subject } from '../domain/model';
 import type { DemoSchool } from '../domain/dashboard';
+import { replaceTeachingAssignment } from '../domain/parity';
 import { go, parameter } from '../lib/routes';
 import { Button } from '../components/ui/button';
 import { NativeSelect } from '../components/ui/native-select';
@@ -44,7 +45,9 @@ export function EntityEditor({ kind, school, edit = false }: { kind: EntityKind;
   const {state,commit}=useWorkspace(); const recordId=parameter('id')||parameter(`${kind}Id`);
   const collection=kind==='student'?state.students:kind==='teacher'?state.teachers:kind==='class'?state.classes:state.subjects;
   const record=collection.find(row=>row.schoolId===school.id&&row.id===recordId);
-  const firstAssignment=state.assignments.find(row=>row.schoolId===school.id&&row.subjectId===recordId);
+  const subjectAssignments=state.assignments.filter(row=>row.schoolId===school.id&&row.subjectId===recordId);
+  const firstAssignment=subjectAssignments.find(row=>row.id===parameter('assignment'))||subjectAssignments[0];
+  const [assignmentId,setAssignmentId]=useState(firstAssignment?.id||'new');
   const student=kind==='student'?record as Student|undefined:undefined; const teacher=kind==='teacher'?record as Teacher|undefined:undefined; const schoolClass=kind==='class'?record as ClassSection|undefined:undefined; const subject=kind==='subject'?record as Subject|undefined:undefined;
   const [values,setValues]=useState<Record<string,string>>({
     name:student?.name||teacher?.name||subject?.name||'', admissionNumber:student?.admissionNumber||'', gender:student?.gender||teacher?.gender||'', classId:student?.classId||firstAssignment?.classId||'', guardianName:student?.guardianName||'', phone:student?.phone||teacher?.phone||'', consent:student?.consent===false?'no':'yes', employeeCode:teacher?.employeeCode||'', email:teacher?.email||'', grade:schoolClass?.grade||'', section:schoolClass?.section||'A', year:schoolClass?.year||'2026-27', teacherId:schoolClass?.teacherId||firstAssignment?.teacherId||'', code:subject?.code||'',
@@ -89,8 +92,7 @@ export function EntityEditor({ kind, school, edit = false }: { kind: EntityKind;
           if(!classes.some(row=>row.id===value.classId)||!teachers.some(row=>row.id===value.teacherId))throw new Error('Choose an active class and teacher.');
           const row:Subject={id:nextId,schoolId:school.id,name:value.name,code:value.code.toUpperCase(),status};
           draft.subjects=draft.subjects.filter(item=>item.id!==nextId);draft.subjects.push(row);
-          const assignment=draft.assignments.find(item=>item.schoolId===school.id&&item.subjectId===nextId&&item.classId===value.classId);
-          if(assignment)assignment.teacherId=value.teacherId;else draft.assignments.push({id:id('assignment'),schoolId:school.id,subjectId:nextId,classId:value.classId,teacherId:value.teacherId});
+          replaceTeachingAssignment(draft,school.id,nextId,assignmentId,value.classId,value.teacherId,id('assignment'));
         }
       });
       go(config[kind].path);
@@ -111,7 +113,8 @@ export function EntityEditor({ kind, school, edit = false }: { kind: EntityKind;
       {(kind==='student'||kind==='subject')&&<Field label="Class and section" name="classId" value={values.classId} onChange={change('classId')} options={selectOptions} required />}
       {kind==='student'&&<><Field label="Guardian name" name="guardianName" value={values.guardianName} onChange={change('guardianName')} /><Field label="Guardian mobile" name="phone" value={values.phone} onChange={change('phone')} type="tel" /><Field label="Parent messaging permission" name="consent" value={values.consent} onChange={change('consent')} options={[{value:'yes',label:'Opted in (sample)'},{value:'no',label:'Do not message'}]} /></>}
       {kind==='teacher'&&<><Field label="Email address" name="email" value={values.email} onChange={change('email')} type="email" required /><Field label="Mobile" name="phone" value={values.phone} onChange={change('phone')} type="tel" /></>}
-      {kind==='class'&&<><Field label="Grade" name="grade" value={values.grade} onChange={change('grade')} options={['Nursery','KG',...Array.from({length:12},(_,i)=>String(i+1))].map(label=>({value:label,label}))} required /><Field label="Section" name="section" value={values.section} onChange={change('section')} required /><Field label="Academic year" name="year" value={values.year} onChange={change('year')} options={state.years.filter(row=>row.schoolId===school.id&&row.status==='current').map(row=>({value:row.label,label:row.label}))} required /></>}
+      {kind==='class'&&<><Field label="Grade" name="grade" value={values.grade} onChange={change('grade')} options={['Nursery','KG',...Array.from({length:10},(_,i)=>String(i+1)),'11 - MPC','11 - BiPC','11 - CEC','12 - MPC','12 - BiPC','12 - CEC','11','12'].map(label=>({value:label,label}))} required /><Field label="Section" name="section" value={values.section} onChange={change('section')} required /><Field label="Academic year" name="year" value={values.year} onChange={change('year')} options={state.years.filter(row=>row.schoolId===school.id&&(row.status!=='closed'||row.label===schoolClass?.year)).map(row=>({value:row.label,label:row.label}))} required /></>}
+      {kind==='subject'&&edit&&<Field label="Teaching assignment" name="teaching-assignment" value={assignmentId} onChange={value=>{setAssignmentId(value);const row=subjectAssignments.find(item=>item.id===value);setValues(previous=>({...previous,classId:row?.classId||'',teacherId:row?.teacherId||''}));}} options={[...subjectAssignments.map(row=>({value:row.id,label:`${classLabel(classes.find(item=>item.id===row.classId))} / ${teachers.find(item=>item.id===row.teacherId)?.name||'Archived teacher'}`})),{value:'new',label:'Add another class assignment'}]} />}
       {kind==='subject'&&<Field label="Subject code" name="code" value={values.code} onChange={change('code')} required />}
       {(kind==='class'||kind==='subject')&&<Field label={kind==='class'?'Class teacher':'Assigned teacher'} name="teacherId" value={values.teacherId} onChange={change('teacherId')} options={teachers.map(row=>({value:row.id,label:row.name}))} required />}
     </FormCard>

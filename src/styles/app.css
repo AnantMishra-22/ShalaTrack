@@ -563,3 +563,51 @@ kbd { font-family: inherit; font-size: 9px; margin-left: 20px; border: 1px solid
  .session-detail-list > div { flex-wrap:wrap; gap:6px 16px; }
  .session-detail-list dd { overflow-wrap:anywhere; }
 }
+/* Original fee collection layout with the approved lavender design system. */
+.fee-collection-layout { display:grid; grid-template-columns:280px minmax(0,1fr); gap:24px; align-items:start; }
+.fee-search-panel, .fee-detail-card { gap:0; padding:0; overflow:hidden; border:1px solid var(--border); box-shadow:var(--soft-shadow); }
+.fee-panel-heading { padding:22px 24px; border-bottom:1px solid var(--border); }
+.fee-panel-heading p, .fee-stage-header p { font-size:12px; line-height:1.7; color:var(--muted-foreground); margin-top:5px; }
+.fee-search-panel > form { display:grid; gap:12px; padding:20px; border-bottom:1px solid var(--border); }
+.fee-search-results { max-height:640px; overflow:auto; padding:0 12px 16px; }
+.fee-search-results > p { padding:16px 8px 0; }
+.fee-student-result { width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left; padding:18px 10px; border-bottom:1px solid var(--border); border-radius:6px; background:transparent; }
+.fee-student-result strong { display:block; font-size:13px; font-weight:500; }
+.fee-student-result small { display:block; font-size:11px; line-height:1.7; color:var(--muted-foreground); margin-top:5px; }
+.fee-student-result > span:last-child { color:var(--primary); font-size:10px; font-weight:600; }
+.fee-student-result:hover, .fee-student-result.is-selected { background:var(--soft-lavender); }
+.fee-detail-column { min-width:0; display:flex; flex-direction:column; gap:24px; }
+.fee-detail-column > .form-error, .fee-detail-column > .success-message { margin:0; }
+.fee-heading-actions { display:flex; align-items:center; justify-content:space-between; gap:14px; }
+.fee-student-profile { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); padding:24px; gap:22px; background:color-mix(in srgb,var(--soft-lavender) 30%,var(--card)); }
+.fee-student-profile small, .fee-student-profile label { display:block; font-size:11px; color:var(--muted-foreground); margin-bottom:8px; }
+.fee-student-profile strong { font-size:14px; font-weight:500; }
+.fee-student-profile select { max-width:180px; background:var(--card); }
+.fee-detail-card .records-card { border:0; border-radius:0; box-shadow:none; }
+.fee-detail-card .records-pagination { display:none; }
+.fee-detail-card .records-card th, .fee-detail-card .records-card td { padding-inline:14px; }
+.fee-original-totals { margin:0 24px 24px; padding:14px 0 0; }
+.fee-original-totals > div { display:flex; justify-content:space-between; gap:20px; padding:12px 0; font-size:13px; }
+.fee-original-totals dd { margin:0; font-weight:500; white-space:nowrap; }
+.fee-original-totals dt { color:var(--muted-foreground); }
+.fee-original-totals .discount-total dd { color:var(--success); }
+.fee-original-totals .payable-total { border-top:1px solid var(--border); margin-top:6px; padding-top:22px; font-size:20px; }
+.fee-original-totals .payable-total dt, .fee-original-totals .payable-total dd { color:var(--primary); font-weight:600; }
+.fee-stage { padding:0; gap:0; border:1px solid var(--border); overflow:hidden; box-shadow:var(--soft-shadow); }
+.fee-stage-header { padding:22px 24px; background:color-mix(in srgb,var(--soft-lavender) 35%,var(--card)); border-bottom:1px solid var(--border); display:flex; align-items:start; gap:14px; }
+.fee-stage-header > span { width:28px; height:28px; display:grid; place-items:center; flex-shrink:0; border-radius:50%; background:var(--primary); color:var(--primary-foreground); font-size:13px; }
+.fee-stage-header > div { flex:1; }
+.fee-stage > form { padding:24px; }
+.fee-stage fieldset { border:0; padding:0; margin:0; min-width:0; }
+.fee-stage fieldset:disabled { opacity:.65; }
+.fee-stage .subtle-note { margin-top:16px; }
+.fee-stage > .subtle-note { padding:0 24px 24px; margin:0; }
+.fee-collection-locked { margin:20px 24px 0; background:var(--warning-soft); color:var(--warning); font-size:12px; line-height:1.7; border-radius:8px; padding:12px 16px; }
+.monthly-register { min-width:0; max-width:100%; }
+.monthly-register table { min-width:1500px; }
+.monthly-register table th:first-child, .monthly-register table td:first-child { min-width:170px; position:sticky; left:0; background:var(--card); z-index:1; }
+.alert-progress { display:grid; gap:10px; margin:20px 0; font-size:13px; }
+.alert-progress progress { width:100%; height:8px; accent-color:var(--primary); }
+@media(min-width:1600px) { .fee-collection-layout { grid-template-columns:320px minmax(0,1fr); gap:32px; } .fee-student-profile { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media(max-width:1100px) { .fee-collection-layout { grid-template-columns:1fr; } .fee-search-results { max-height:240px; } .fee-search-panel > form { grid-template-columns:1fr auto; } }
+@media(max-width:600px) { .fee-panel-heading, .fee-stage-header { padding:20px; } .fee-stage > form, .fee-student-profile { padding:20px; } .fee-stage-header .success-badge { display:none; } .fee-original-totals { margin-inline:20px; } .fee-heading-actions { flex-wrap:wrap; } .fee-collection-layout { gap:20px; } .fee-search-panel > form { grid-template-columns:1fr; } .fee-student-profile strong { overflow-wrap:anywhere; } .fee-detail-card .records-card table { min-width:560px; } .fee-original-totals .payable-total { font-size:18px; } }

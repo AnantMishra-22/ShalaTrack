@@ -40,3 +40,11 @@ The Node server-render smoke test passes for all 43 route components. Existing-r
 ## Production integration remaining
 
 Actual authentication/role authorization, database tenant isolation, protected registered displays, signed/one-time QR redemption, server idempotency/transactions, audit integrity, provider delivery and settlement verification belong to the future backend. The local preview is not a substitute for these controls. Original backend proposal files remain unchanged.
+
+## Original workflow restoration — 8 November 2026
+
+Restored the original fee collection structure and two-step payable/discount lock, category status, installment dialog and receipt totals. Original student/teacher/class directory filters and export columns, monthly register preview, class-teacher visibility, explicit subject-assignment replacement, senior-secondary streams, planned-year preparation, individual absence alerts and progress have been restored. Added Vercel rewrites for original HTML URLs. Sample sign-in now requires a known active teacher/admin identity and does not enter the administrator workspace automatically; school context survives reload. Existing demo concessions migrate without being credited again.
+
+The 17 domain/export checks cover payable setup, zero discount, repeat rejection, assignment replacement and legacy local-data migration in addition to prior rules. Route-render checks include restored fee stages, report fields, streams and future years. The production build and original-file isolation check are required before handoff.
+
+Browser visual/interaction verification remains unavailable following the earlier browser URL-policy rejection; no workaround or successful visual review is claimed. The local interface still uses the fixed fictional demo day and simulated services, with per-period attendance, QR arrival and reversible archives retained as agreed.

@@ -2,7 +2,7 @@ import { demoSessions, schools, DEMO_DAY } from '../domain/dashboard';
 import { classLabel, type DemoState } from '../domain/model';
 
 export function createDemoState(): DemoState {
-  const state: DemoState = { schema: 2, students: [], teachers: [], classes: [], subjects: [], assignments: [], years: [], slots: [], sessions: [], corrections: [], challenges: [], checkIns: [], feePlans: [], assessments: [], concessions: [], payments: [], reversals: [], ledger: [], notices: [], deliveries: [], audit: [] };
+  const state: DemoState = { schema: 2, students: [], teachers: [], classes: [], subjects: [], assignments: [], years: [], slots: [], sessions: [], corrections: [], challenges: [], checkIns: [], feeAccounts: [], feePlans: [], assessments: [], concessions: [], payments: [], reversals: [], ledger: [], notices: [], deliveries: [], audit: [] };
   const firstNames = ['Aarav', 'Ananya', 'Vihaan', 'Ishita', 'Arjun', 'Diya', 'Kabir', 'Myra', 'Aditya', 'Saanvi', 'Reyansh', 'Anika', 'Vivaan', 'Aanya', 'Ishaan', 'Kiara', 'Atharv', 'Riya', 'Dhruv', 'Tara'];
   const surnames = ['Sharma', 'Patel', 'Joshi', 'Rao', 'Desai', 'Shah', 'Kulkarni', 'Thomas', 'Menon', 'Patil'];
   const teacherNames = ['Kavya Rao', 'Arjun Desai', 'Meera Shah', 'Rohan Kulkarni', 'Ananya Joshi', 'Nikhil Patil', 'Sara Thomas', 'Dev Menon', 'Neha Sharma', 'Vikram Singh', 'Pooja Nair', 'Aman Verma'];
