@@ -63,3 +63,7 @@ The fee collection page follows the original two-column student-search/account l
 Original directory reports and gender/contact/assignment fields are restored alongside the separate period-attendance report. Teacher reports include an on-screen monthly register. Class-teacher assignments drive My classes; subject assignments can be explicitly selected and replaced. Grades 11/12 MPC, BiPC and CEC and planned academic-year preparation are restored. Individual and bulk absence-alert simulations include progress and deduplication. Legacy HTML URLs have Vercel rewrites into the React entry point.
 
 Real authentication, provider messaging and server QR verification remain outside this frontend phase. The reproducible demo day and the agreed per-period attendance, QR check-in, archive/restore and manual cash/UPI/bank scope remain in place.
+
+## Class-first fee dashboard
+
+The fee dashboard follows the supplied overview reference using the approved lavender palette: banner, four school-wide cards, class list and fee summary. Each class combines its sections; selecting a row opens its student accounts with section, net fee, discount, collected amount, outstanding amount and an Open account action. Back navigation preserves the academic year and class-list filters. Net assigned fees already deduct discounts; collected values subtract reversals. Category filtering locates classes with that category while keeping complete class-account totals, as labelled on screen.

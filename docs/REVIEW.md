@@ -48,3 +48,7 @@ Restored the original fee collection structure and two-step payable/discount loc
 The 17 domain/export checks cover payable setup, zero discount, repeat rejection, assignment replacement and legacy local-data migration in addition to prior rules. Route-render checks include restored fee stages, report fields, streams and future years. The production build and original-file isolation check are required before handoff.
 
 Browser visual/interaction verification remains unavailable following the earlier browser URL-policy rejection; no workaround or successful visual review is claimed. The local interface still uses the fixed fictional demo day and simulated services, with per-period attendance, QR arrival and reversible archives retained as agreed.
+
+## Class-wise fee overview
+
+Implemented the new reference layout with cumulative grade/class rows across sections and URL-based student drill-down. Twenty domain/export tests cover aggregation, student/class/school reconciliation, discount and reversal accounting, year/school isolation and zero-payable statuses. A route-render check verifies the default class list and the student breakdown. Actual browser visual/interaction checks remain unavailable under the earlier URL-policy block.

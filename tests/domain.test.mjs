@@ -130,3 +130,30 @@ test('migration preserves old credits, locks them and adds future years without 
   assert.equal(again.years.find(row=>row.schoolId==='maplewood'&&row.label==='2027-28').status,'planned');
   assert.equal(again.years.find(row=>row.schoolId==='maplewood'&&row.label==='2026-27').status,'current');
 });
+
+const feeOverview = await sourceModule('../src/domain/feeOverview.ts');
+test('class overview combines sections and reconciles school, class and student totals',()=>{
+  const state=createDemoState();state.classes.find(row=>row.id==='maplewood-class-2').grade='1';state.classes.find(row=>row.id==='maplewood-class-2').section='B';
+  const result=feeOverview.classFeeOverview(state,'maplewood','2026-27');
+  const group=result.groups.find(row=>row.grade==='1');assert.equal(group.students,50);assert.deepEqual(group.sections,['A','B']);
+  assert.deepEqual(feeOverview.totalFees(result.groups),result.totals);
+  assert.deepEqual(feeOverview.totalFees(group.accounts),feeOverview.totalFees([group]));
+  assert.equal(result.totals.net,result.totals.collected+result.totals.outstanding);
+  assert.equal(result.totals.students,200);
+});
+test('overview applies discounts once, subtracts reversals and isolates years/schools',()=>{
+  const state=parity.migrateWorkspace(createDemoState()),student=state.students[0];
+  parity.savePayableSetup(state,{id:'setup',schoolId:student.schoolId,studentId:student.id,year:'2026-27',discountType:'amount',discountValue:1000,discountPaise:100000,paidAtSetup:500000},'credit','entry','now');
+  const payment=state.payments.find(row=>row.studentId===student.id);state.reversals.push({id:'reversal',schoolId:student.schoolId,paymentId:payment.id,amountPaise:payment.amountPaise});state.ledger.push({id:'reversal-ledger',schoolId:student.schoolId,studentId:student.id,year:'2026-27',amountPaise:payment.amountPaise});
+  const result=feeOverview.classFeeOverview(state,'maplewood','2026-27'),account=result.accounts.find(row=>row.id===student.id);
+  assert.equal(account.collected,0);assert.equal(account.discount,100000);assert.equal(account.net,1900000);assert.equal(account.outstanding,1900000);
+  assert.equal(result.totals.net,result.totals.collected+result.totals.outstanding);
+  assert.equal(feeOverview.classFeeOverview(state,'riverdale','2026-27').totals.discount,0);
+  assert.equal(feeOverview.classFeeOverview(state,'maplewood','2027-28').totals.students,0);
+});
+test('fully discounted fees are paid without dividing by zero; unassessed fees stay distinct',()=>{
+  const full={gross:10000,discount:10000,net:0,collected:0,outstanding:0,students:1};
+  assert.equal(feeOverview.feeStatus(full),'Paid');assert.equal(feeOverview.collectionRate(full),100);
+  const empty={gross:0,discount:0,net:0,collected:0,outstanding:0,students:1};
+  assert.equal(feeOverview.feeStatus(empty),'Not assessed');assert.equal(feeOverview.collectionRate(empty),0);
+});

@@ -36,5 +36,13 @@ try {
     window.location.hash='#/teacher-screens/reports.html';assert.ok(renderRoute('teacher-screens/reports.html').includes('Attendance register'));
     window.location.hash='#/add-class.html';const editor=renderRoute('add-class.html');assert.ok(editor.includes('11 - MPC'));assert.ok(editor.includes('2027-28'));
   });
+  test('fee dashboard defaults to cumulative classes and drills down to student accounts',()=>{
+    window.location.hash='#/fee-dashboard.html';const overview=renderRoute('fee-dashboard.html');
+    assert.ok(overview.includes('Class-wise fee overview'));assert.ok(overview.includes('View Class 1 students'));assert.ok(overview.includes('Total fee assigned'));
+    assert.ok(!overview.includes('ST0001'));
+    window.location.hash='#/fee-dashboard.html?class=1&year=2026-27';const detail=renderRoute('fee-dashboard.html');
+    assert.ok(detail.includes('Student fees'));assert.ok(detail.includes('All classes'));assert.ok(detail.includes('ST0001'));assert.ok(detail.includes('Open account'));
+    assert.ok(!detail.includes('ST0026'));
+  });
 } finally { await server.close(); }
 

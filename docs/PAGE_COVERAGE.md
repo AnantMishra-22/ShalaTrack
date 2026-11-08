@@ -19,7 +19,7 @@ All 39 original destinations have React implementations. The four backend-aligne
 | `add-subject.html` | Add subject | Name; Code; Class and section; Assigned teacher; Save subject |
 | `edit-subject.html` | Edit subject | Edit subject; Save changes; Archive and restore confirmation |
 | `attendance.html` | Teacher attendance | Attendance date; Teacher statuses; Refresh; QR verification context |
-| `fee-dashboard.html` | Fee overview | Assessed fees; Collections; Outstanding balances; Class, category and status filters; Record payment |
+| `fee-dashboard.html` | Fee overview | School fee summary cards; Cumulative class totals across sections; Student drill-down and fee accounts; Category and status filters; Record payment |
 | `fee-structure.html` | Fee structure | Academic year; Class and fee category; Payment schedule; Installments; Fee totals |
 | `fee-collection.html` | Collect fees | Student lookup; One-time payable setup and locked discount; Category allocations; Cash, UPI and bank reference; Payment date; Print receipt |
 | `fee-history.html` | Fee history | Search; Class, payment mode and date filters; Payment details; Receipt lookup |

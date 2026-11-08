@@ -23,7 +23,7 @@ export const originalPages: PageDefinition[] = [
   page('add-subject.html', 'Add subject', 'Academics', ['Name', 'Code', 'Class and section', 'Assigned teacher', 'Save subject']),
   page('edit-subject.html', 'Edit subject', 'Academics', ['Edit subject', 'Save changes', 'Archive and restore confirmation']),
   page('attendance.html', 'Teacher attendance', 'Attendance', ['Attendance date', 'Teacher statuses', 'Refresh', 'QR verification context']),
-  page('fee-dashboard.html', 'Fee overview', 'Fees', ['Assessed fees', 'Collections', 'Outstanding balances', 'Class, category and status filters', 'Record payment']),
+  page('fee-dashboard.html', 'Fee overview', 'Fees', ['School fee summary cards', 'Cumulative class totals across sections', 'Student drill-down and fee accounts', 'Category and status filters', 'Record payment']),
   page('fee-structure.html', 'Fee structure', 'Fees', ['Academic year', 'Class and fee category', 'Payment schedule', 'Installments', 'Fee totals']),
   page('fee-collection.html', 'Collect fees', 'Fees', ['Student lookup', 'One-time payable setup and locked discount', 'Category allocations', 'Cash, UPI and bank reference', 'Payment date', 'Print receipt']),
   page('fee-history.html', 'Fee history', 'Fees', ['Search', 'Class, payment mode and date filters', 'Payment details', 'Receipt lookup']),
