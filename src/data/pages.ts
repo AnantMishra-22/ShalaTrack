@@ -11,7 +11,7 @@ export const originalPages: PageDefinition[] = [
   page('index.html', 'Sign in', 'Access', ['Admin and teacher roles', 'Email and password', 'Password visibility'], 'built'),
   page('admin.html', 'School overview', 'Access', ['School overview', 'Student attendance', 'Module shortcuts', 'Teacher attendance', 'Recent activity'], 'built'),
   page('students.html', 'Students', 'People', ['Student search', 'Class filter', 'Student count', 'Hostel and transport filters', 'Student details', 'Add and edit student']),
-  page('add-student.html', 'Add student', 'People', ['Admission number', 'Name and gender', 'Class and section', 'Guardian name and mobile', 'Hostel and transport enrollment details', 'Validation']),
+  page('add-student.html', 'Add student', 'People', ['Admission number', 'Name and gender', 'Separate class and section selection', 'Guardian name and mobile', 'Hostel and transport enrollment details', 'Validation']),
   page('edit-student.html', 'Edit student', 'People', ['Edit student and service details', 'Save changes', 'Archive and restore confirmation']),
   page('teachers.html', 'Teachers', 'People', ['Teacher search', 'Active teachers', 'Add and edit teacher']),
   page('add-teacher.html', 'Add teacher', 'People', ['Employee code', 'Name and gender', 'Mobile and email', 'Account invitation replacing administrator-set passwords']),

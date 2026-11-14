@@ -56,11 +56,14 @@ export function EntityEditor({ kind, school, edit = false }: { kind: EntityKind;
     hostelEnabled:student?.hostel?.enrolled||(!edit&&parameter('service')==='hostel')?'yes':'no',hostelBuilding:student?.hostel?.building||'',hostelRoom:student?.hostel?.room||'',hostelAdmittedOn:student?.hostel?.admittedOn||'2026-11-02',transportEnabled:student?.transport?.enrolled||(!edit&&parameter('service')==='transport')?'yes':'no',transportRoute:student?.transport?.route||'',transportStop:student?.transport?.stop||'',transportVehicle:student?.transport?.vehicle||'',transportStartsOn:student?.transport?.startsOn||'2026-11-02',
     name:student?.name||teacher?.name||subject?.name||'', admissionNumber:student?.admissionNumber||'', gender:student?.gender||teacher?.gender||'', classId:student?.classId||firstAssignment?.classId||'', guardianName:student?.guardianName||'', phone:student?.phone||teacher?.phone||'', consent:student?.consent===false?'no':'yes', employeeCode:teacher?.employeeCode||'', email:teacher?.email||'', grade:schoolClass?.grade||'', section:schoolClass?.section||'A', year:schoolClass?.year||'2026-27', teacherId:schoolClass?.teacherId||firstAssignment?.teacherId||'', code:subject?.code||'',
   });
+  const [studentClass,setStudentClass]=useState('');
   const [error,setError]=useState(''); const [confirm,setConfirm]=useState(false); const [message,setMessage]=useState('');
   const change=(key:string)=>(value:string)=>{setValues(previous=>({...previous,[key]:value}));setError('');};
   const classes=state.classes.filter(row=>row.schoolId===school.id&&row.status==='active');
   const teachers=state.teachers.filter(row=>row.schoolId===school.id&&row.status==='active');
   const selectOptions=classes.map(row=>({value:row.id,label:`${classLabel(row)} (${row.year})`}));
+  const studentClassOptions=[...new Map(classes.map(row=>[JSON.stringify([row.grade,row.year]),{value:JSON.stringify([row.grade,row.year]),label:`Class ${row.grade} (${row.year})`}])).values()];
+  const studentSections=classes.filter(row=>JSON.stringify([row.grade,row.year])===studentClass).sort((a,b)=>a.section.localeCompare(b.section,'en',{numeric:true}));
   function submit(event:FormEvent<HTMLFormElement>){
     event.preventDefault();setError('');
     try{
@@ -72,7 +75,7 @@ export function EntityEditor({ kind, school, edit = false }: { kind: EntityKind;
         if(kind==='student'){
           if(!value.admissionNumber)throw new Error('Enter an admission number.');
           if(draft.students.some(row=>row.schoolId===school.id&&row.admissionNumber.toLowerCase()===value.admissionNumber.toLowerCase()&&row.id!==nextId))throw new Error('This admission number is already in use.');
-          if(!classes.some(row=>row.id===value.classId))throw new Error('Choose an active class and section.');
+          if(!classes.some(row=>row.id===value.classId&&(edit||JSON.stringify([row.grade,row.year])===studentClass)))throw new Error('Choose an active class and section.');
           const row:Student={id:nextId,schoolId:school.id,admissionNumber:value.admissionNumber,name:value.name,gender:value.gender,classId:value.classId,guardianName:value.guardianName,phone:value.phone,consent:value.consent==='yes',status,hostel:{enrolled:value.hostelEnabled==='yes',building:value.hostelBuilding,room:value.hostelRoom,admittedOn:value.hostelAdmittedOn},transport:{enrolled:value.transportEnabled==='yes',route:value.transportRoute,stop:value.transportStop,vehicle:value.transportVehicle,startsOn:value.transportStartsOn}};
           validateStudentServices(row);
           draft.students=draft.students.filter(item=>item.id!==nextId);draft.students.push(row);
@@ -115,7 +118,8 @@ export function EntityEditor({ kind, school, edit = false }: { kind: EntityKind;
       {kind==='teacher'&&<Field label="Employee code" name="employeeCode" value={values.employeeCode} onChange={change('employeeCode')} required />}
       {kind!=='class'&&<Field label={kind==='subject'?'Subject name':'Full name'} name="name" value={values.name} onChange={change('name')} required />}
       {(kind==='student'||kind==='teacher')&&<Field label="Gender" name="gender" value={values.gender} onChange={change('gender')} options={['Female','Male','Other','Prefer not to say'].map(label=>({value:label,label}))} />}
-      {(kind==='student'||kind==='subject')&&<Field label="Class and section" name="classId" value={values.classId} onChange={change('classId')} options={selectOptions} required />}
+      {kind==='student'&&!edit&&<><Field label="Class" name="student-class" value={studentClass} onChange={value=>{setStudentClass(value);change('classId')('');}} options={studentClassOptions} required /><Field label="Section" name="student-section" value={values.classId} onChange={change('classId')} options={studentSections.map(row=>({value:row.id,label:row.section}))} disabled={!studentClass} hint={!studentClass?'Select a class first.':studentSections.length?'Sections available for the selected class.':'No sections available. Create an active class section first.'} required /></>}
+      {((kind==='student'&&edit)||kind==='subject')&&<Field label="Class and section" name="classId" value={values.classId} onChange={change('classId')} options={selectOptions} required />}
       {kind==='student'&&<><Field label="Guardian name" name="guardianName" value={values.guardianName} onChange={change('guardianName')} /><Field label="Guardian mobile" name="phone" value={values.phone} onChange={change('phone')} type="tel" /><Field label="Parent messaging permission" name="consent" value={values.consent} onChange={change('consent')} options={[{value:'yes',label:'Opted in (sample)'},{value:'no',label:'Do not message'}]} /></>}
       {kind==='teacher'&&<><Field label="Email address" name="email" value={values.email} onChange={change('email')} type="email" required /><Field label="Mobile" name="phone" value={values.phone} onChange={change('phone')} type="tel" /></>}
       {kind==='class'&&<><Field label="Grade" name="grade" value={values.grade} onChange={change('grade')} options={['Nursery','KG',...Array.from({length:10},(_,i)=>String(i+1)),'11 - MPC','11 - BiPC','11 - CEC','12 - MPC','12 - BiPC','12 - CEC','11','12'].map(label=>({value:label,label}))} required /><Field label="Section" name="section" value={values.section} onChange={change('section')} required /><Field label="Academic year" name="year" value={values.year} onChange={change('year')} options={state.years.filter(row=>row.schoolId===school.id&&(row.status!=='closed'||row.label===schoolClass?.year)).map(row=>({value:row.label,label:row.label}))} required /></>}

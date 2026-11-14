@@ -7,7 +7,7 @@ All 39 original destinations have React implementations. The four backend-aligne
 | `index.html` | Sign in | Admin and teacher roles; Email and password; Password visibility |
 | `admin.html` | School overview | School overview; Student attendance; Module shortcuts; Teacher attendance; Recent activity |
 | `students.html` | Students | Student search; Class filter; Student count; Hostel and transport filters; Student details; Add and edit student |
-| `add-student.html` | Add student | Admission number; Name and gender; Class and section; Guardian name and mobile; Hostel and transport enrollment details; Validation |
+| `add-student.html` | Add student | Admission number; Name and gender; Separate class and section selection; Guardian name and mobile; Hostel and transport enrollment details; Validation |
 | `edit-student.html` | Edit student | Edit student and service details; Save changes; Archive and restore confirmation |
 | `teachers.html` | Teachers | Teacher search; Active teachers; Add and edit teacher |
 | `add-teacher.html` | Add teacher | Employee code; Name and gender; Mobile and email; Account invitation replacing administrator-set passwords |
